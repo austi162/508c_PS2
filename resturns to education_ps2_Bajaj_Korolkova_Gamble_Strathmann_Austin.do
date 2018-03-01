@@ -41,8 +41,6 @@ label variable loghourlywage "Log hourly wage"
 
 //generage race dummies
 #delimit ;
-gen white = 1 if race == 100 ;
-replace white = . if race != 100 ;
 
 gen black = 1 if
 	race == 200 |
@@ -108,7 +106,6 @@ replace race3 = 3 if
 	race != 814 ;
 # delimit cr
 
-label variable white "White race dummy"
 label variable black "Black race dummy"
 label variable other "Other race dummy"
 label variable race3 "Race is W B or O"
@@ -225,11 +222,16 @@ reg loghourlywage educyears exper exper2
 ********************************************************************************
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
 reg loghourlywage educyears exper exper2 race3 sex, r 	
+local controls exper exper2 race3 sex
 
 ********************************************************************************
 **                                   P6                                       **
 ********************************************************************************
 //summary statistics and cross tabs//
+//Based on the “extended” regression specification, plot the estimated 
+//wage-experience profile, holding education, sex, and race constant at their 
+// sample averages.
+
 
 ********************************************************************************
 **                                   P7                                       **
