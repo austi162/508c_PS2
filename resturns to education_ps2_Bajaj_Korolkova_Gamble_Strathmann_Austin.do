@@ -40,39 +40,52 @@ gen loghourlywage = ln(incwage / (uhrswork * wkswork1))
 label variable loghourlywage "Log hourly wage"
 
 //generage race dummies
-/*
-gen white = 1 if race == 100
-replace white = . if race != 100
-label variable white "White race dummy"
-
-
-gen black = 1 if race == 200
-replace black = . if race != 200
-label variable black "Black race dummy"
-
-gen other = 1 if race != 100 | race != 200
-replace other = . if race == 100 | race == 200
-label variable other "Other race dummy"
-
-gen race2 = 1 if race == 100
-replace race2 = 2 if race == 200 
-replace race2 = 3 if race != 100 & race != 200
-label variable race2 "Race is W B or O"
-
 #delimit ;
-label define race2_lbl
-	1 White
-	2 Black
-	3 Other
-;
-#delimit cr
+gen white = 1 if race == 100 ;
+replace white = . if race != 100 ;
 
-label values race2 race2_lbl
-*/
+gen black = 1 if
+	race == 200 |
+	race == 801 |
+	race == 805 |
+	race == 806 |
+	race == 807 |
+	race == 810 |
+	race == 811 |
+	race == 814 ;
+replace black = . if
+	race != 200 &
+	race != 801 &
+	race != 805 &
+	race != 806 &
+	race != 807 &
+	race != 810 &
+	race != 811 &
+	race != 814 ;
 
-gen race3 = 1 if race == 100
+gen other = 1 if 
+	race != 100 &
+	race != 200 &
+	race != 801 &
+	race != 805 &
+	race != 806 &
+	race != 807 &
+	race != 810 &
+	race != 811 &
+	race != 814 ;
+replace other = . if
+	race == 100 &
+	race == 200 &
+	race == 801 &
+	race == 805 &
+	race == 806 &
+	race == 807 &
+	race == 810 &
+	race == 811 &
+	race == 814 ;
 
-#delimit ;
+gen race3 = 1 if race == 100 ;
+
 replace race3 = 2 if 
 	race == 200 |
 	race == 801 |
@@ -81,8 +94,7 @@ replace race3 = 2 if
 	race == 807 |
 	race == 810 |
 	race == 811 |
-	race == 814 
-;
+	race == 814 ;
 
 replace race3 = 3 if 
 	race != 100 &
@@ -93,10 +105,12 @@ replace race3 = 3 if
 	race != 807 &
 	race != 810 &
 	race != 811 &
-	race != 814 
-;
+	race != 814 ;
 # delimit cr
 
+label variable white "White race dummy"
+label variable black "Black race dummy"
+label variable other "Other race dummy"
 label variable race3 "Race is W B or O"
 
 //generate education variable for years of schooling
