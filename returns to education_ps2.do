@@ -119,6 +119,7 @@ label variable race3 race3_lbl
 label variable black "Black race dummy"
 label variable other "Other race dummy"
 label variable race3 "Race"
+label variable sex "Gender"
 
 //generate education variable for years of schooling
 gen educyears = educ
@@ -259,7 +260,7 @@ save returnstoeduc_ps2_updated.dta, replace
 use nlsy79
 
 label variable educ "Years of education"
-label variable male "Sex"
+label variable male "Gender"
 
 //Generate a log hourly wage variable and a “potential experience” variable.
 gen loghourlywage = ln(laborinc07 / hours07) 
@@ -290,11 +291,12 @@ label variable exper2 "Squared potential experience"
 local controls black hisp male
 
 reg loghourlywage educ exper exper2 `controls', r
-outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Sex Controls,X)append label 	
+outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Gender Controls,X)append label 	
 
 //How do your estimates of the return to education and the return to experience 
 //compare to the estimates from the CPS? If there are differences, hypothesize 
 //why.
+//See submitted assignment.
 
 ********************************************************************************
 **                                   P9                                       **
