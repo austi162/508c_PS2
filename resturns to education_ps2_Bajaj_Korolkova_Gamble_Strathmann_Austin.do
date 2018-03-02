@@ -13,7 +13,7 @@ Last modified on: 2/28/18
 clear all
 
 *Set directory, dta file, etc.
-*cd "C:\Users\TerryMoon\Dropbox\Teaching Princeton\wws508c 2018S\ps\ps2"
+*cd "C:\Users\TerryMoon\Dropbox\Teac=hing Princeton\wws508c 2018S\ps\ps2"
 cd "C:\Users\Chris\Documents\Princeton\WWS Spring 2018\WWS 508c\PS2\DTA"
 
 set more off
@@ -41,7 +41,6 @@ label variable loghourlywage "Log hourly wage"
 
 //generage race dummies
 #delimit ;
-
 gen black = 1 if
 	race == 200 |
 	race == 801 |
@@ -104,11 +103,17 @@ replace race3 = 3 if
 	race != 810 &
 	race != 811 &
 	race != 814 ;
+
+label define race3_lbl
+	1 White
+	2 Black
+	3 Other ;
 # delimit cr
 
+label variable race3 race3_lbl
 label variable black "Black race dummy"
 label variable other "Other race dummy"
-label variable race3 "Race is W B or O"
+label variable race3 "Race"
 
 //generate education variable for years of schooling
 gen educyears = educ
@@ -161,7 +166,6 @@ gen exper = (age - educyears - 5)
 label variable exper "Potential experience"
 
 // generate exper^2 variable
-
 gen exper2 = exper^2
 label variable exper2 "Squared potential experience"
 
@@ -221,16 +225,20 @@ reg loghourlywage educyears exper exper2
 **                                   P5                                       **
 ********************************************************************************
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
-reg loghourlywage educyears exper exper2 race3 sex, r 	
 local controls exper exper2 race3 sex
+
+reg loghourlywage `controls', r 	
 
 ********************************************************************************
 **                                   P6                                       **
 ********************************************************************************
-//summary statistics and cross tabs//
 //Based on the “extended” regression specification, plot the estimated 
 //wage-experience profile, holding education, sex, and race constant at their 
 // sample averages.
+
+sort exper
+
+twoway (fpfit loghourlywage exper2), ytitle(Wage-experience profile) by(race3 sex)
 
 
 ********************************************************************************
