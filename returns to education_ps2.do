@@ -232,9 +232,9 @@ reg loghourlywage educyears exper exper2
 **                                   P5                                       **
 ********************************************************************************
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
-local controls exper exper2 black other sex
+local controls black other sex
 
-reg loghourlywage `controls', r 	
+reg loghourlywage exper exper2 `controls', r 	
 
 ********************************************************************************
 **                                   P6                                       **
@@ -272,7 +272,6 @@ sum loghourlywage
 // and sex.
 gen age07 = (age79 + 28)
 
-
 // generage potential experience variable
 gen exper = (age07 - educ - 5)
 label variable exper "Potential experience"
@@ -282,10 +281,9 @@ gen exper2 = exper^2
 label variable exper2 "Squared potential experience"
 
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
-local controls exper exper2 black hisp male
+local controls black hisp male
 
-reg loghourlywage `controls', r 	
-
+reg loghourlywage exper exper2 `controls', r 	
 
 //How do your estimates of the return to education and the return to experience 
 //compare to the estimates from the CPS? If there are differences, hypothesize 
