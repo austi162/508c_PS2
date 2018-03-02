@@ -49,8 +49,9 @@ gen black = 1 if
 	race == 807 |
 	race == 810 |
 	race == 811 |
-	race == 814 ;
-replace black = . if
+	race == 814 
+;
+replace black = 0 if
 	race != 200 &
 	race != 801 &
 	race != 805 &
@@ -58,7 +59,8 @@ replace black = . if
 	race != 807 &
 	race != 810 &
 	race != 811 &
-	race != 814 ;
+	race != 814 
+;
 
 gen other = 1 if 
 	race != 100 &
@@ -69,8 +71,9 @@ gen other = 1 if
 	race != 807 &
 	race != 810 &
 	race != 811 &
-	race != 814 ;
-replace other = . if
+	race != 814 
+;
+replace other = 0 if
 	race == 100 &
 	race == 200 &
 	race == 801 &
@@ -79,7 +82,8 @@ replace other = . if
 	race == 807 &
 	race == 810 &
 	race == 811 &
-	race == 814 ;
+	race == 814 
+;
 
 gen race3 = 1 if race == 100 ;
 replace race3 = 2 if 
@@ -90,7 +94,8 @@ replace race3 = 2 if
 	race == 807 |
 	race == 810 |
 	race == 811 |
-	race == 814 ;
+	race == 814 
+;
 replace race3 = 3 if 
 	race != 100 &
 	race != 200 &
@@ -100,12 +105,14 @@ replace race3 = 3 if
 	race != 807 &
 	race != 810 &
 	race != 811 &
-	race != 814 ;
+	race != 814 
+;
 
 label define race3_lbl
 	1 White
 	2 Black
-	3 Other ;
+	3 Other
+;
 # delimit cr
 
 label variable race3 race3_lbl
@@ -118,9 +125,9 @@ gen educyears = educ
 
 #delimit ;
 recode educyears
-	0	=	.
-	1	=	.
-	2	=	1
+	0	=	0
+	1	=	0
+	2	=	.5
 	10	=	2.5
 	11	=	1
 	12	=	2
@@ -190,8 +197,10 @@ di loghourlywagesd
 reg loghourlywage educyears, r
 
 //Based on your regression coefficient and the summary statistics in your answer 
-//to question(2), calculate the correlation between education and the log hourly wage.
-display _b[educyears]*(educyearssd/loghourlywagesd) 
+//to question(2), calculate the correlation between education and the log hourly 
+//wage.
+di _b[educyears]*(educyearssd/loghourlywagesd)
+
 
 //Confirm that your calculation is correct using Stata’s corr command
 corr loghourlywage educyears
@@ -204,7 +213,8 @@ di (_b[educyears]*(educyearssd/loghourlywagesd))^2
 ********************************************************************************
 **                                   P4                                       **
 ********************************************************************************
-//Estimate the Mincerian Wage Equation. What is the estimated return to education?
+//Estimate the Mincerian Wage Equation. What is the estimated return to
+//education?
 reg loghourlywage educyears exper exper2, r
 
 //Frisch-Waugh Theorem
@@ -222,7 +232,7 @@ reg loghourlywage educyears exper exper2
 **                                   P5                                       **
 ********************************************************************************
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
-local controls exper exper2 race3 sex
+local controls exper exper2 black other sex
 
 reg loghourlywage `controls', r 	
 
@@ -237,11 +247,73 @@ sort exper
 
 twoway (fpfit loghourlywage exper2), ytitle(Wage-experience profile) by(race3 sex)
 
+save returnstoeduc_ps2_updated.dta, replace
+
 ********************************************************************************
 **                                   P7                                       **
 ********************************************************************************
-//summary statistics and cross tabs//
+//run NLSY data.
+use nlsy79
 
+//Generate a log hourly wage variable and a “potential experience” variable.
+gen loghourlywage = ln(laborinc07 / hours07) 
+label variable loghourlywage "Log hourly wage"
+
+//Drop anyone who worked less than 35 hrs/week for 50 weeks.
+drop if hours07 < (35*50)
+
+//Summarize the data.
+sum loghourlywage
+
+********************************************************************************
+**                                   P8                                       **
+********************************************************************************
+//Estimate an extended Mincerian Wage Equation with controls for race/ethnicity 
+// and sex.
+gen age07 = (age79 + 28)
+
+
+// generage potential experience variable
+gen exper = (age07 - educ - 5)
+label variable exper "Potential experience"
+
+// generate exper^2 variable
+gen exper2 = exper^2
+label variable exper2 "Squared potential experience"
+
+//Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
+local controls exper exper2 black hisp male
+
+reg loghourlywage `controls', r 	
+
+
+//How do your estimates of the return to education and the return to experience 
+//compare to the estimates from the CPS? If there are differences, hypothesize 
+//why.
+
+********************************************************************************
+**                                   P9                                       **
+********************************************************************************
+//See submitted assignment.
+
+
+********************************************************************************
+**                                   P10                                      **
+********************************************************************************
+//Do you think any of these variables (cognitive test scores and childhood 
+//environment) would be appropriate as control variables in the Mincerian Wage 
+//Equation? If so, re-estimate the equation, controlling for race/ethnicity, 
+//sex, and any other variables as you see appropriate.
+
+
+//What happens to theestimated return to education? Interpret any changes you 
+//observe.
+
+
+********************************************************************************
+**                                   P11                                      **
+********************************************************************************
+//
 
 
 
