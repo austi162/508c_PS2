@@ -7,7 +7,7 @@
 /*
 Credit: Somya Bajaj, Joelle Gamble, Anastasia Korolkova, Luke Strathmann, Chris Austin
 Last modified by: Chris Austin
-Last modified on: 3/1/18
+Last modified on: 3/2/18
 */
 
 clear all
@@ -122,6 +122,7 @@ label variable race3 "Race"
 
 //generate education variable for years of schooling
 gen educyears = educ
+label variable educyears "Years of education"
 
 #delimit ;
 recode educyears
@@ -163,8 +164,6 @@ recode educyears
 	999	=	.
 ;
 #delimit cr
-
-label variable educyears "Number of years of education"
 
 // generage potential experience variable
 gen exper = (age - educyears - 5)
@@ -216,6 +215,7 @@ di (_b[educyears]*(educyearssd/loghourlywagesd))^2
 //Estimate the Mincerian Wage Equation. What is the estimated return to
 //education?
 reg loghourlywage educyears exper exper2, r
+outreg2 using PS2_Outreg.xls, ctitle (CPS Short) replace label
 
 //Frisch-Waugh Theorem
 reg loghourlywage exper exper2
@@ -225,16 +225,19 @@ reg educyears exper exper2
 predict u_educyears, resid
 
 reg u_loghourlywage u_educyears
+outreg2 using PS2_Frish-Waugh.xls, ctitle (CPS Short) replace label
 
 reg loghourlywage educyears exper exper2
+outreg2 using PS2_Frish-Waugh.xls, ctitle (CPS Short) append label
 
 ********************************************************************************
 **                                   P5                                       **
 ********************************************************************************
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
-local controls black other sex
+local controls race3 sex
 
-reg loghourlywage exper exper2 `controls', r 	
+reg loghourlywage educyears exper exper2 `controls', r 	
+outreg2 using PS2_Outreg.xls, ctitle(CPS Extended) addtext(Race and Sex Controls,X)append label
 
 ********************************************************************************
 **                                   P6                                       **
@@ -254,6 +257,9 @@ save returnstoeduc_ps2_updated.dta, replace
 ********************************************************************************
 //run NLSY data.
 use nlsy79
+
+label variable educ "Years of education"
+label variable male "Sex"
 
 //Generate a log hourly wage variable and a “potential experience” variable.
 gen loghourlywage = ln(laborinc07 / hours07) 
@@ -283,7 +289,8 @@ label variable exper2 "Squared potential experience"
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
 local controls black hisp male
 
-reg loghourlywage exper exper2 `controls', r 	
+reg loghourlywage educ exper exper2 `controls', r
+outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Sex Controls,X)append label 	
 
 //How do your estimates of the return to education and the return to experience 
 //compare to the estimates from the CPS? If there are differences, hypothesize 
@@ -303,15 +310,19 @@ reg loghourlywage exper exper2 `controls', r
 //Equation? If so, re-estimate the equation, controlling for race/ethnicity, 
 //sex, and any other variables as you see appropriate.
 
+local backgroundcontrols foreign urban14 mag14 news14 lib14 educ_mom educ_dad numsibs
 
-//What happens to theestimated return to education? Interpret any changes you 
+//What happens to the estimated return to education? Interpret any changes you 
 //observe.
+
+reg loghourlywage educ exper exper2 `controls' `backgroundcontrols', r
+outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Sex Controls,X, Background Controls,X)append label 
 
 
 ********************************************************************************
 **                                   P11                                      **
 ********************************************************************************
-//
+//See submitted assignment.
 
 
 
