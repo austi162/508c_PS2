@@ -4,11 +4,9 @@
 *  Email: chris.austin@princeton.edu  *
 ***************************************
 
-/*
-Credit: Somya Bajaj, Joelle Gamble, Anastasia Korolkova, Luke Strathmann, Chris Austin
+/* Credit: Somya Bajaj, Joelle Gamble, Anastasia Korolkova, Luke Strathmann, Chris Austin
 Last modified by: Chris Austin
-Last modified on: 3/2/18
-*/
+Last modified on: 3/2/18 */
 
 clear all
 
@@ -19,7 +17,7 @@ cd "C:\Users\Chris\Documents\Princeton\WWS Spring 2018\WWS 508c\PS2\DTA"
 set more off
 set matsize 10000
 capture log close
-log using PS1.log, replace
+log using PS2.log, replace
 
 *Download outreg2
 ssc install outreg2
@@ -190,6 +188,7 @@ gen loghourlywagesd = r(sd)
 label variable loghourlywagesd "SD loghourlywages"
 di loghourlywagesd
 
+
 ********************************************************************************
 **                                   P3                                       **
 ********************************************************************************
@@ -240,18 +239,19 @@ local controls race3 sex
 reg loghourlywage educyears exper exper2 `controls', r 	
 outreg2 using PS2_Outreg.xls, ctitle(CPS Extended) addtext(Race and Sex Controls,X)append label
 
+
 ********************************************************************************
 **                                   P6                                       **
 ********************************************************************************
 //Based on the “extended” regression specification, plot the estimated 
 //wage-experience profile, holding education, sex, and race constant at their 
 // sample averages.
-
 sort exper
 
 twoway (fpfit loghourlywage exper2), ytitle(Wage-experience profile) by(race3 sex)
 
 save returnstoeduc_ps2_updated.dta, replace
+
 
 ********************************************************************************
 **                                   P7                                       **
@@ -271,6 +271,7 @@ drop if hours07 < (35*50)
 
 //Summarize the data.
 sum loghourlywage
+
 
 ********************************************************************************
 **                                   P8                                       **
@@ -298,6 +299,7 @@ outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Gender Cont
 //why.
 //See submitted assignment.
 
+
 ********************************************************************************
 **                                   P9                                       **
 ********************************************************************************
@@ -311,14 +313,14 @@ outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Gender Cont
 //environment) would be appropriate as control variables in the Mincerian Wage 
 //Equation? If so, re-estimate the equation, controlling for race/ethnicity, 
 //sex, and any other variables as you see appropriate.
-
 local backgroundcontrols foreign urban14 mag14 news14 lib14 educ_mom educ_dad numsibs
+
+reg loghourlywage educ exper exper2 `controls' `backgroundcontrols', r
+outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Sex Controls,X, Background Controls,X)append label
 
 //What happens to the estimated return to education? Interpret any changes you 
 //observe.
-
-reg loghourlywage educ exper exper2 `controls' `backgroundcontrols', r
-outreg2 using PS2_Outreg.xls, ctitle(NSLY Extended) addtext(Race and Sex Controls,X, Background Controls,X)append label 
+//See submitted assignment.
 
 
 ********************************************************************************
