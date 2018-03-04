@@ -38,62 +38,19 @@ gen loghourlywage = ln(incwage / (uhrswork * wkswork1))
 label variable loghourlywage "Log hourly wage"
 
 //generage race dummies
+gen black = 1 if race == 200
+replace black = 0 if race != 200
+
+gen white = 1 if race == 100
+replace white = 0 if race != 100
+
+gen other = 1 if race != 100 & race != 200
+replace other = 0 if race == 100 | race == 200
+
+gen race3 = 1 if race == 100 
+replace race3 = 2 if race == 200 
+
 #delimit ;
-gen black = 1 if
-	race == 200 |
-	race == 801 |
-	race == 805 |
-	race == 806 |
-	race == 807 |
-	race == 810 |
-	race == 811 |
-	race == 814 
-;
-replace black = 0 if
-	race != 200 &
-	race != 801 &
-	race != 805 &
-	race != 806 &
-	race != 807 &
-	race != 810 &
-	race != 811 &
-	race != 814 
-;
-
-gen other = 1 if 
-	race != 100 &
-	race != 200 &
-	race != 801 &
-	race != 805 &
-	race != 806 &
-	race != 807 &
-	race != 810 &
-	race != 811 &
-	race != 814 
-;
-replace other = 0 if
-	race == 100 &
-	race == 200 &
-	race == 801 &
-	race == 805 &
-	race == 806 &
-	race == 807 &
-	race == 810 &
-	race == 811 &
-	race == 814 
-;
-
-gen race3 = 1 if race == 100 ;
-replace race3 = 2 if 
-	race == 200 |
-	race == 801 |
-	race == 805 |
-	race == 806 |
-	race == 807 |
-	race == 810 |
-	race == 811 |
-	race == 814 
-;
 replace race3 = 3 if 
 	race != 100 &
 	race != 200 &
@@ -103,8 +60,15 @@ replace race3 = 3 if
 	race != 807 &
 	race != 810 &
 	race != 811 &
+	race != 814 &
+	race != 801 &
+	race != 805 &
+	race != 806 &
+	race != 807 &
+	race != 810 &
+	race != 811 &
 	race != 814 
-;
+;	
 
 label define race3_lbl
 	1 White
@@ -117,11 +81,9 @@ label variable race3 race3_lbl
 label variable black "Black race dummy"
 label variable other "Other race dummy"
 label variable race3 "Race"
-label variable sex "Gender"
 
 //generate education variable for years of schooling
 gen educyears = educ
-label variable educyears "Years of education"
 
 #delimit ;
 recode educyears
@@ -143,7 +105,7 @@ recode educyears
 	50	=	10
 	60	=	11
 	70	=	12
-	71	=	12
+	71	=	11.5
 	72	=	12
 	73	=	12
 	80	=	13
@@ -163,6 +125,12 @@ recode educyears
 	999	=	.
 ;
 #delimit cr
+
+label variable educyears "Years of education"
+
+gen gender = sex
+replace gender = 0 if sex == 2
+label variable gender "Gender"
 
 // generage potential experience variable
 gen exper = (age - educyears - 5)
@@ -234,7 +202,7 @@ outreg2 using PS2_Frish-Waugh.xls, ctitle (CPS Short) append label
 **                                   P5                                       **
 ********************************************************************************
 //Estimate an “extended” Mincerian Wage Equation that controls for race and sex.
-local controls race3 sex
+local controls black other gender
 
 reg loghourlywage educyears exper exper2 `controls', r 	
 outreg2 using PS2_Outreg.xls, ctitle(CPS Extended) addtext(Race and Sex Controls,X)append label
@@ -246,11 +214,23 @@ outreg2 using PS2_Outreg.xls, ctitle(CPS Extended) addtext(Race and Sex Controls
 //Based on the “extended” regression specification, plot the estimated 
 //wage-experience profile, holding education, sex, and race constant at their 
 // sample averages.
-sort exper
 
-twoway (fpfit loghourlywage exper2), ytitle(Wage-experience profile) by(race3 sex)
+gen p_ln_hr_wageX =  _b[exper]*exper + _b[exper2]*exper2 + _b[educyears]*14.01753 + ///
+					 _b[gender]*.5654974 +_b[black]*.1087052 + _b[other]*.0842952 + _b[_cons] 
+				  
+sum p_ln_hr_wageX
+
+sort exper exper2
+
+label variable p_ln_hr_wageX "Estimated Wage"
+graph twoway (line p_ln_hr_wageX exper), ytitle(Wage-experience profile)
+
+
+graph twoway (fpfit loghourlywage exper2), ytitle(Wage-experience profile) by(race3 sex)
 
 save returnstoeduc_ps2_updated.dta, replace
+
+
 
 
 ********************************************************************************
